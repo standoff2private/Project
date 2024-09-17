@@ -1,0 +1,16 @@
+{
+       "manifest_version": 3,
+       "name": "Remove Elements Extension",
+       "version": "1.0",
+       "description": "An extension that removes unwanted elements from a webpage.",
+       "permissions": [
+           "activeTab"
+       ],
+       "content_scripts": [
+           {
+               "matches": ["https://yooma.su/"],   // «амените на конкретные URL, если требуетс€
+               "js": ["content.js"]
+           }
+       ]
+   }
+   
