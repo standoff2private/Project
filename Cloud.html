@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChayCloud — каталог загрузок</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .fade-in { animation: fadeInUp .5s ease forwards; }
+      .btn-download { position: relative; overflow: hidden; }
+      .btn-download::after {
+        content: ""; position: absolute; top: 0; left: -120%;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.1); transform: skewX(-20deg);
+      }
+      .btn-download:hover::after { left: 120%; transition: left 0.6s ease; }
+    </style>
+  </head>
+  <body class="bg-white text-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 min-h-screen text-base">
+    <!-- ===== Header ===== -->
+    <header class="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-950/60 shadow">
+      <div class="mx-auto max-w-5xl px-5 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="h-10 w-10 rounded-xl bg-zinc-100 dark:bg-white text-zinc-900 flex items-center justify-center shadow text-lg">↓</div>
+          <div class="leading-tight">
+            <h1 class="text-xl font-semibold">ChayCloud</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Скачать быстро и просто</p>
+          </div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <!-- Кнопка Тема -->
+          <button id="theme-toggle"
+            class="px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-transparent shadow-sm dark:shadow-none text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
+            Тёмная
+          </button>
+
+          <!-- Кнопка Telegram -->
+          <a href="https://t.me/ChayCloud" target="_blank" rel="noreferrer"
+            class="inline-flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-transparent shadow-sm dark:shadow-none hover:bg-zinc-100 dark:hover:bg-white hover:text-zinc-900 transition">
+            Telegram
+          </a>
+
+          <!-- Кнопка Информация с tooltip снизу -->
+          <div class="relative group">
+            <button
+              class="px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-transparent shadow-sm dark:shadow-none text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition">
+              Информация
+            </button>
+            <div
+              class="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-80 p-4 rounded-lg bg-zinc-900 text-white text-sm opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-lg">
+              ChayCloud — это каталог загрузок с быстрым и простым доступом к программам, играм и системному ПО.
+              <br><br>
+              Зачем этот сайт нужен, если я могу скачать с официального сайта? Бывают разные ситуации, например, установил Windows и нужно устанавливать программы. 
+              Чтобы не тратить много времени на поиск сайтов, можно зайти на ChayCloud и скачать всё в один клик с официального сайта.
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="mx-auto max-w-5xl px-5 py-8">
+      <!-- Категории -->
+      <div class="mb-5 flex gap-3 flex-wrap text-base">
+        <button class="cat-btn px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none hover:border-black dark:hover:border-white transition" data-cat="all">Все</button>
+        <button class="cat-btn px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none hover:border-black dark:hover:border-white transition" data-cat="programs">Программы</button>
+        <button class="cat-btn px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none hover:border-black dark:hover:border-white transition" data-cat="system">Системное ПО</button>
+        <button class="cat-btn px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none hover:border-black dark:hover:border-white transition" data-cat="os">Операционные системы</button>
+        <button class="cat-btn px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none hover:border-black dark:hover:border-white transition" data-cat="game">Игры</button>
+      </div>
+
+      <!-- Поиск -->
+      <div class="mb-8">
+        <input id="search" type="text" placeholder="Поиск (например: Minecraft, NVIDIA, Windows)"
+          class="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none px-5 py-3 text-base outline-none placeholder:text-zinc-400 focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white transition" />
+      </div>
+
+      <!-- Список приложений -->
+      <ul id="app-list" class="grid grid-cols-1 gap-8 md:grid-cols-2"></ul>
+
+      <div id="empty" class="hidden mt-10 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-7 text-center text-base text-zinc-500 dark:text-zinc-400">
+        Ничего не найдено. Попробуйте изменить запрос
+      </div>
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="mx-auto max-w-5xl px-5 pb-10 pt-5 text-xs text-zinc-500 dark:text-zinc-400">
+      <p>© <span id="year"></span> ChayCloud. Все ссылки ведут на официальные сайты</p>
+    </footer>
+
+    <!-- ===== Script ===== -->
+    <script>
+      const apps = [
+        { name: "Telegram", description: "Скачать [прямая ссылка]", tags: ["Windows"], category: "programs", link: "https://telegram.org/dl/desktop/win64" },
+        { name: "Windows 11", description: "24H2 Official version", tags: ["64-bit"], category: "os", link: "https://drive.google.com/file/d/1d-_zrEuFX8Kcq5AcZ8u74EF4qipikmXZ/view?usp=sharing" },
+        { name: "Windows 10", description: "22H2 Official version", tags: ["64-bit"], category: "os", link: "https://drive.google.com/file/d/1EmZQJygrzOQpZJzjOP9WwF_b-_WArxic/view?usp=sharing" },
+        { name: "Hiddify-Vpn", description: "Vpn client", tags: ["Windows"], category: "programs", link: "https://github.com/hiddify/hiddify-app/releases/download/v2.0.5/Hiddify-Windows-Setup-x64.exe" },
+        { name: "Steam", description: "Game Launcher", tags: ["Windows"], category: "programs", link: "https://cdn.fastly.steamstatic.com/client/installer/SteamSetup.exe" },
+        { name: "Minecraft", description: "Legacy Launcher", tags: ["Windows"], category: "game", link: "https://dl.llaun.ch/legacy/installer" }
+      ];
+
+      function renderApps() {
+        const appList = document.getElementById('app-list');
+        appList.innerHTML = '';
+        apps.forEach(app => {
+          const li = document.createElement('li');
+          li.className = 'group fade-in rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-7 shadow-sm dark:shadow hover:shadow-md dark:hover:shadow-white/30 hover:scale-[1.02] transition';
+          li.dataset.name = app.name.toLowerCase();
+          li.dataset.tags = app.tags.join(' ').toLowerCase();
+          li.dataset.category = app.category;
+          li.innerHTML = `
+            <h2 class="text-xl font-semibold group-hover:text-black dark:group-hover:text-white transition">${app.name}</h2>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">${app.description}</p>
+            <a href="${app.link}" target="_blank" class="mt-4 inline-block btn-download px-4 py-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-900 transition">Скачать</a>
+          `;
+          appList.appendChild(li);
+        });
+      }
+
+      renderApps();
+
+      // Тема
+      const themeToggle = document.getElementById('theme-toggle');
+      themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
+
+      // Фильтр категорий
+      const catBtns = document.querySelectorAll('.cat-btn');
+      catBtns.forEach(btn => btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        document.querySelectorAll('#app-list > li').forEach(li => {
+          li.style.display = (cat === 'all' || li.dataset.category === cat) ? 'block' : 'none';
+        });
+      }));
+
+      // Поиск
+      document.getElementById('search').addEventListener('input', e => {
+        const val = e.target.value.toLowerCase();
+        let empty = true;
+        document.querySelectorAll('#app-list > li').forEach(li => {
+          const text = li.dataset.name + ' ' + li.dataset.tags;
+          if(text.includes(val)) { li.style.display = 'block'; empty = false; }
+          else li.style.display = 'none';
+        });
+        document.getElementById('empty').style.display = empty ? 'block' : 'none';
+      });
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
